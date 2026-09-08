@@ -31,7 +31,7 @@
             <string>Owner</string>
             <key>LSItemContentTypes</key>
             <array>
-                <string>com.timomod.patch-package</string>
+                <string>com.k3ndzy.patch-package</string>
             </array>
         </dict>
     </array>

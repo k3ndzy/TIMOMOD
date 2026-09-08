@@ -422,7 +422,7 @@ final class PackageRepositoryStore: ObservableObject {
         ]
         sources = [source]
         repositories[source.id] = PackageRepository(
-            identifier: "com.timomod.preview",
+            identifier: "com.k3ndzy.preview",
             name: "TIMO MOD Preview",
             summary: "Simulator-only marketplace preview",
             iconURL: nil,
@@ -436,7 +436,7 @@ final class PackageRepositoryStore: ObservableObject {
     private func installSimulatorWallpaperRepository() {
         let revision = "f04c0a8e81c328201ad7769fac16b907ce905035"
         let sourceURL = URL(
-            string: "https://raw.githubusercontent.com/timomod/timomod-repo/main/" +
+            string: "https://raw.githubusercontent.com/k3ndzy/TIMOMOD-repo/main/" +
                 "repositories/demo/repo.json"
         )!
         let previewURL = URL(
@@ -482,7 +482,7 @@ final class PackageRepositoryStore: ObservableObject {
         )
         sources = [source]
         repositories[source.id] = PackageRepository(
-            identifier: "com.timomod.timomod",
+            identifier: "com.k3ndzy.timomod",
             name: "TIMO MOD Repository",
             summary: "Nguồn chính thức cho tweak và wallpaper của TIMO MOD.",
             iconURL: nil,

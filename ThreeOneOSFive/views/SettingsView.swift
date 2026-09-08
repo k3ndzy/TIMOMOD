@@ -106,7 +106,7 @@ struct SettingsView: View {
                     creditsRow(
                         name: "GitHub",
                         role: language.text("social.github_role"),
-                        url: "https://github.com/timomod/timomod"
+                        url: "https://github.com/k3ndzy/TIMOMOD"
                     )
                     creditsRow(
                         name: "Cộng Đồng IOSVN",

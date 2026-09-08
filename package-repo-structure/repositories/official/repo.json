@@ -1,0 +1,24 @@
+{
+  "formatVersion": 1,
+  "identifier": "com.timomod.official",
+  "name": "TIMO MOD Official Repository",
+  "summary": "Official source for TIMO MOD tweaks, patches, and wallpapers",
+  "icon": "https://raw.githubusercontent.com/timomod/timomod/main/docs/images/app-icon.png",
+  "packages": [
+    {
+      "kind": "patch",
+      "identifier": "com.timomod.demo.cleaner",
+      "name": "Clean UI Patch",
+      "author": "TIMO MOD",
+      "version": "1.0.0",
+      "summary": "A clean and minimal UI patch for better app experience",
+      "description": "This patch provides a cleaner interface with reduced visual clutter and improved readability.",
+      "icon": "https://raw.githubusercontent.com/timomod/timomod-repo/main/icons/clean-ui.png",
+      "downloadURL": "https://raw.githubusercontent.com/timomod/timomod-repo/main/packages/clean-ui-patch-v1.0.0.timo",
+      "bundleIdentifier": "com.apple.Preferences",
+      "size": 2048,
+      "minimumOSVersion": "15.0",
+      "maximumOSVersion": "18.1"
+    }
+  ]
+}
