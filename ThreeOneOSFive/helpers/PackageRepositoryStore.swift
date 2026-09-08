@@ -64,12 +64,15 @@ final class PackageRepositoryStore: ObservableObject {
         
         // TIMO MOD: Auto-refresh k3ndzy repository on startup
         Task {
+            NSLog("🔄 TIMO MOD: Starting repository sync...")
             print("🔄 TIMO MOD: Starting repository sync...")
             await synchronizeDefaultSources()
             for source in sources {
+                NSLog("🔄 TIMO MOD: Refreshing source: %@", source.manifestURL.absoluteString)
                 print("🔄 TIMO MOD: Refreshing source: \(source.manifestURL)")
                 refresh(source)
             }
+            NSLog("✅ TIMO MOD: Repository refresh completed")
             print("✅ TIMO MOD: Repository refresh completed")
         }
         
@@ -196,9 +199,12 @@ final class PackageRepositoryStore: ObservableObject {
     }
 
     private func synchronizeDefaultSources() async {
+        NSLog("🔄 TIMO MOD: synchronizeDefaultSources() called")
+        print("🔄 TIMO MOD: synchronizeDefaultSources() called")
         catalogSyncOperations += 1
         defer { catalogSyncOperations -= 1 }
         do {
+            NSLog("📡 TIMO MOD: Loading catalog from: %@", PackageRepositoryDefaults.catalogURL.absoluteString)
             let catalogURLs = try await PackageRepositoryNetworkClient
                 .loadSourceCatalog(from: PackageRepositoryDefaults.catalogURL)
             let existingCount = sources.count

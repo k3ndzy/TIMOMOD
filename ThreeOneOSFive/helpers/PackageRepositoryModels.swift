@@ -287,6 +287,7 @@ enum PackageRepositoryURLPolicy {
 
 enum PackageRepositoryValidator {
     static func decode(_ data: Data, sourceURL: URL) throws -> PackageRepository {
+        NSLog("🔍 TIMO DEBUG: Starting repository decode, size: %d bytes", data.count)
         print("🔍 TIMO DEBUG: Starting repository decode...")
         print("🔍 TIMO DEBUG: Data size: \(data.count) bytes")
         
