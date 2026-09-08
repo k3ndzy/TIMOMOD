@@ -58,7 +58,7 @@ final class PackageRepositoryStore: ObservableObject {
         // TIMO MOD: Override sources with k3ndzy repo and initialize
         sources = k3ndzySources
         for source in sources {
-            sourceStates[source.id] = .pending
+            sourceStates[source.id] = .idle
         }
         
         // TIMO MOD: Auto-refresh k3ndzy repository on startup
