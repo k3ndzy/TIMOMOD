@@ -30,6 +30,15 @@ final class PackageRepositoryStore: ObservableObject {
         defaults.removeObject(forKey: Self.storageKey)
         defaults.removeObject(forKey: Self.resolutionStorageKey)
         
+        // TIMO MOD: Auto-add k3ndzy repository for testing
+        let k3ndzySources = [
+            RepositorySource(
+                manifestURL: URL(string: "https://raw.githubusercontent.com/k3ndzy/TIMOMOD-repo/main/repositories/official/repo.json")!
+            )
+        ]
+        sources = k3ndzySources
+        sources = k3ndzySources
+        
         if let data = defaults.data(forKey: Self.resolutionStorageKey),
            let decoded = try? JSONDecoder().decode(
                RepositoryPackageResolutionIndex.self,
@@ -45,9 +54,24 @@ final class PackageRepositoryStore: ObservableObject {
         } else {
             sources = []
         }
+        
+        // TIMO MOD: Override sources with k3ndzy repo and initialize
+        sources = k3ndzySources
         for source in sources {
-            sourceStates[source.id] = .idle
+            sourceStates[source.id] = .pending
         }
+        
+        // TIMO MOD: Auto-refresh k3ndzy repository on startup
+        Task {
+            print("🔄 TIMO MOD: Starting repository sync...")
+            await synchronizeDefaultSources()
+            for source in sources {
+                print("🔄 TIMO MOD: Refreshing source: \(source.manifestURL)")
+                refresh(source)
+            }
+            print("✅ TIMO MOD: Repository refresh completed")
+        }
+        
 #if targetEnvironment(simulator)
         // TIMO MOD: Disabled simulator repositories - use real k3ndzy/TIMOMOD-repo only
         /*
