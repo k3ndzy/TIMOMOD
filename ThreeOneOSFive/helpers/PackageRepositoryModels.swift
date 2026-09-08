@@ -387,45 +387,82 @@ enum PackageRepositoryValidator {
             }
         }
         
-        guard isValidIdentifier(package.identifier),
-              isValidText(package.name, maximumBytes: PackageRepositoryLimits.maximumNameBytes),
-              isValidText(package.author, maximumBytes: PatchPackageLimits.maximumAuthorBytes),
-              isValidText(package.version, maximumBytes: 64),
-              isValidText(package.summary, maximumBytes: PackageRepositoryLimits.maximumSummaryBytes),
-              isValidOptionalText(
-                package.description,
-                maximumBytes: PackageRepositoryLimits.maximumDescriptionBytes,
-                allowsLineBreaks: true
-              ),
-              isValidOptionalText(package.category, maximumBytes: 80),
-              isValidOptionalText(
-                package.changelog,
-                maximumBytes: PackageRepositoryLimits.maximumChangelogBytes,
-                allowsLineBreaks: true
-              ),
-              isValidOptionalText(package.publishedAt, maximumBytes: 64),
-              isValidOptionalPassword(package.password),
-              (package.tags?.count ?? 0) <= PackageRepositoryLimits.maximumTagCount,
-              (package.screenshots?.count ?? 0)
-                <= PackageRepositoryLimits.maximumScreenshotCount,
-              package.expectedSizeIsValid else {
+        print("🔍 TIMO DEBUG: Validating package: \(package.identifier)")
+        
+        let identifierValid = isValidIdentifier(package.identifier)
+        let nameValid = isValidText(package.name, maximumBytes: PackageRepositoryLimits.maximumNameBytes)
+        let authorValid = isValidText(package.author, maximumBytes: PatchPackageLimits.maximumAuthorBytes)
+        let versionValid = isValidText(package.version, maximumBytes: 64)
+        let summaryValid = isValidText(package.summary, maximumBytes: PackageRepositoryLimits.maximumSummaryBytes)
+        let descriptionValid = isValidOptionalText(
+            package.description,
+            maximumBytes: PackageRepositoryLimits.maximumDescriptionBytes,
+            allowsLineBreaks: true
+        )
+        let categoryValid = isValidOptionalText(package.category, maximumBytes: 80)
+        let changelogValid = isValidOptionalText(
+            package.changelog,
+            maximumBytes: PackageRepositoryLimits.maximumChangelogBytes,
+            allowsLineBreaks: true
+        )
+        let publishedAtValid = isValidOptionalText(package.publishedAt, maximumBytes: 64)
+        let passwordValid = isValidOptionalPassword(package.password)
+        let tagsCountValid = (package.tags?.count ?? 0) <= PackageRepositoryLimits.maximumTagCount
+        let screenshotsCountValid = (package.screenshots?.count ?? 0) <= PackageRepositoryLimits.maximumScreenshotCount
+        let expectedSizeValid = package.expectedSizeIsValid
+        
+        NSLog("📝 TIMO DEBUG: identifier valid: %@", identifierValid ? "YES" : "NO")
+        NSLog("📝 TIMO DEBUG: name valid: %@ (len: %d)", nameValid ? "YES" : "NO", package.name.count)
+        NSLog("📝 TIMO DEBUG: author valid: %@ (len: %d)", authorValid ? "YES" : "NO", package.author.count)
+        NSLog("📝 TIMO DEBUG: version valid: %@ (len: %d)", versionValid ? "YES" : "NO", package.version.count)
+        NSLog("📝 TIMO DEBUG: summary valid: %@ (len: %d)", summaryValid ? "YES" : "NO", package.summary.count)
+        NSLog("📝 TIMO DEBUG: description valid: %@", descriptionValid ? "YES" : "NO")
+        NSLog("📝 TIMO DEBUG: category valid: %@", categoryValid ? "YES" : "NO")
+        NSLog("📝 TIMO DEBUG: changelog valid: %@", changelogValid ? "YES" : "NO")
+        NSLog("📝 TIMO DEBUG: publishedAt valid: %@", publishedAtValid ? "YES" : "NO")
+        NSLog("📝 TIMO DEBUG: password valid: %@", passwordValid ? "YES" : "NO")
+        NSLog("📝 TIMO DEBUG: tags count valid: %@ (%d tags)", tagsCountValid ? "YES" : "NO", package.tags?.count ?? 0)
+        NSLog("📝 TIMO DEBUG: screenshots count valid: %@ (%d screenshots)", screenshotsCountValid ? "YES" : "NO", package.screenshots?.count ?? 0)
+        NSLog("📝 TIMO DEBUG: expected size valid: %@", expectedSizeValid ? "YES" : "NO")
+        
+        guard identifierValid,
+              nameValid,
+              authorValid,
+              versionValid,
+              summaryValid,
+              descriptionValid,
+              categoryValid,
+              changelogValid,
+              publishedAtValid,
+              passwordValid,
+              tagsCountValid,
+              screenshotsCountValid,
+              expectedSizeValid else {
+            NSLog("❌ TIMO DEBUG: Package validation failed")
             print("❌ TIMO DEBUG: Package validation failed")
             throw PackageRepositoryError.invalidPackage
         }
+        NSLog("✅ TIMO DEBUG: Package basic validation passed")
         print("✅ TIMO DEBUG: Package basic validation passed")
 
         let canonicalTags = try canonicalTags(
             category: package.category,
             tags: package.tags ?? []
         )
+        NSLog("🏷️ TIMO DEBUG: Canonical tags created successfully")
+        
         let publishedAt: Date?
         if let rawPublishedAt = package.publishedAt {
+            NSLog("📅 TIMO DEBUG: Parsing publishedAt: %@", rawPublishedAt)
             guard let parsedDate = PackagePublicationDate.parse(rawPublishedAt) else {
+                NSLog("❌ TIMO DEBUG: Failed to parse publishedAt date: %@", rawPublishedAt)
                 throw PackageRepositoryError.invalidPackage
             }
             publishedAt = parsedDate
+            NSLog("✅ TIMO DEBUG: PublishedAt parsed successfully")
         } else {
             publishedAt = nil
+            NSLog("📅 TIMO DEBUG: No publishedAt provided")
         }
 
         for range in package.supportedOS {
