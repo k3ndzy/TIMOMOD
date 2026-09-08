@@ -231,9 +231,13 @@ final class PackageRepositoryStore: ObservableObject {
     }
 
     func refresh(_ source: RepositorySource) {
+        print("🔄 TIMO MOD: refresh() called for source: \(source.manifestURL)")
         guard state(for: source.id) != .loading else {
+            print("⏳ TIMO MOD: Source already loading, skipping")
             return
         }
+        
+        print("🔄 TIMO MOD: Starting load for source: \(source.id)")
         sourceStates[source.id] = .loading
         Task {
             do {
@@ -561,13 +565,20 @@ enum PackageRepositoryNetworkClient {
     }
 
     static func loadRepository(from sourceURL: URL) async throws -> PackageRepository {
+        print("📡 TIMO MOD: Starting network request to: \(sourceURL)")
         let trustedURL = try PackageRepositoryURLPolicy.validate(sourceURL)
+        print("✅ TIMO MOD: URL validated: \(trustedURL)")
+        
         let download = try await downloadFile(
             from: trustedURL,
             maximumBytes: PackageRepositoryLimits.maximumManifestBytes
         )
+        print("📦 TIMO MOD: Downloaded \(download.fileURL) from \(download.finalURL)")
+        
         defer { try? FileManager.default.removeItem(at: download.fileURL) }
         let data = try Data(contentsOf: download.fileURL, options: .mappedIfSafe)
+        print("📊 TIMO MOD: Loaded \(data.count) bytes of JSON data")
+        
         return try PackageRepositoryValidator.decode(
             data,
             sourceURL: download.finalURL
