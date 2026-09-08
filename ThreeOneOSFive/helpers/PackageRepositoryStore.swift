@@ -25,6 +25,11 @@ final class PackageRepositoryStore: ObservableObject {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
+        
+        // TIMO MOD: Clear old repository cache to ensure fresh start
+        defaults.removeObject(forKey: Self.storageKey)
+        defaults.removeObject(forKey: Self.resolutionStorageKey)
+        
         if let data = defaults.data(forKey: Self.resolutionStorageKey),
            let decoded = try? JSONDecoder().decode(
                RepositoryPackageResolutionIndex.self,
