@@ -287,18 +287,31 @@ enum PackageRepositoryURLPolicy {
 
 enum PackageRepositoryValidator {
     static func decode(_ data: Data, sourceURL: URL) throws -> PackageRepository {
+        print("🔍 TIMO DEBUG: Starting repository decode...")
+        print("🔍 TIMO DEBUG: Data size: \(data.count) bytes")
+        
         guard data.count <= PackageRepositoryLimits.maximumManifestBytes else {
+            print("❌ TIMO DEBUG: File too large: \(data.count) > \(PackageRepositoryLimits.maximumManifestBytes)")
             throw PackageRepositoryError.invalidManifest
         }
         let trustedSourceURL = try PackageRepositoryURLPolicy.validate(sourceURL)
+        print("✅ TIMO DEBUG: Source URL validated: \(trustedSourceURL)")
+        
         let document: PackageRepositoryDocument
         do {
+            print("🔍 TIMO DEBUG: Starting JSON decode...")
             document = try JSONDecoder().decode(PackageRepositoryDocument.self, from: data)
+            print("✅ TIMO DEBUG: JSON decode successful")
+            print("✅ TIMO DEBUG: Schema version: \(document.schemaVersion)")
+            print("✅ TIMO DEBUG: Repository: \(document.name)")
+            print("✅ TIMO DEBUG: Packages: \(document.packages.count)")
         } catch {
+            print("❌ TIMO DEBUG: JSON decode failed: \(error)")
             throw PackageRepositoryError.invalidManifest
         }
 
         guard document.schemaVersion == 1 else {
+            print("❌ TIMO DEBUG: Invalid schema version: \(document.schemaVersion)")
             throw PackageRepositoryError.unsupportedSchema
         }
         guard isValidIdentifier(document.identifier),
@@ -309,8 +322,13 @@ enum PackageRepositoryValidator {
                 allowsLineBreaks: true
               ),
               document.packages.count <= PackageRepositoryLimits.maximumPackageCount else {
+            print("❌ TIMO DEBUG: Repository validation failed")
+            print("❌ TIMO DEBUG: identifier valid: \(isValidIdentifier(document.identifier))")
+            print("❌ TIMO DEBUG: name valid: \(isValidText(document.name, maximumBytes: PackageRepositoryLimits.maximumNameBytes))")
+            print("❌ TIMO DEBUG: package count: \(document.packages.count) (max: \(PackageRepositoryLimits.maximumPackageCount))")
             throw PackageRepositoryError.invalidManifest
         }
+        print("✅ TIMO DEBUG: Repository metadata validated")
 
         let iconURL = try document.icon.map {
             try PackageRepositoryURLPolicy.resolve($0, relativeTo: trustedSourceURL)
@@ -319,14 +337,22 @@ enum PackageRepositoryValidator {
         var packages: [RepositoryPackage] = []
         packages.reserveCapacity(document.packages.count)
 
-        for rawPackage in document.packages {
+        for (index, rawPackage) in document.packages.enumerated() {
+            print("🔍 TIMO DEBUG: Validating package \(index + 1): \(rawPackage.name)")
             guard identifiers.insert(rawPackage.identifier).inserted else {
+                print("❌ TIMO DEBUG: Duplicate package identifier: \(rawPackage.identifier)")
                 throw PackageRepositoryError.duplicatePackage
             }
-            packages.append(
-                try validate(rawPackage, sourceURL: trustedSourceURL)
-            )
+            do {
+                let package = try validate(rawPackage, sourceURL: trustedSourceURL)
+                packages.append(package)
+                print("✅ TIMO DEBUG: Package \(index + 1) validated successfully")
+            } catch {
+                print("❌ TIMO DEBUG: Package \(index + 1) validation failed: \(error)")
+                throw error
+            }
         }
+        print("✅ TIMO DEBUG: All packages validated successfully")
 
         return PackageRepository(
             identifier: document.identifier,
@@ -342,6 +368,24 @@ enum PackageRepositoryValidator {
         _ package: PackageRepositoryPackageDocument,
         sourceURL: URL
     ) throws -> RepositoryPackage {
+        print("🔍 TIMO DEBUG: Starting package validation for: \(package.name)")
+        
+        let validations = [
+            ("identifier", isValidIdentifier(package.identifier)),
+            ("name", isValidText(package.name, maximumBytes: PackageRepositoryLimits.maximumNameBytes)),
+            ("author", isValidText(package.author, maximumBytes: PatchPackageLimits.maximumAuthorBytes)),
+            ("version", isValidText(package.version, maximumBytes: 64)),
+            ("summary", isValidText(package.summary, maximumBytes: PackageRepositoryLimits.maximumSummaryBytes))
+        ]
+        
+        for (field, isValid) in validations {
+            if !isValid {
+                print("❌ TIMO DEBUG: Package validation failed for field: \(field)")
+            } else {
+                print("✅ TIMO DEBUG: Package field \(field): OK")
+            }
+        }
+        
         guard isValidIdentifier(package.identifier),
               isValidText(package.name, maximumBytes: PackageRepositoryLimits.maximumNameBytes),
               isValidText(package.author, maximumBytes: PatchPackageLimits.maximumAuthorBytes),
@@ -364,8 +408,10 @@ enum PackageRepositoryValidator {
               (package.screenshots?.count ?? 0)
                 <= PackageRepositoryLimits.maximumScreenshotCount,
               package.expectedSizeIsValid else {
+            print("❌ TIMO DEBUG: Package validation failed")
             throw PackageRepositoryError.invalidPackage
         }
+        print("✅ TIMO DEBUG: Package basic validation passed")
 
         let canonicalTags = try canonicalTags(
             category: package.category,
