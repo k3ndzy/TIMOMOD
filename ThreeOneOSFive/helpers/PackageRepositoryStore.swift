@@ -31,10 +31,10 @@ final class PackageRepositoryStore: ObservableObject {
         defaults.removeObject(forKey: Self.resolutionStorageKey)
         
         // TIMO MOD: Auto-add k3ndzy repository for testing
-        let timestamp = Int(Date().timeIntervalSince1970)
+        let timestamp = 1788886700 // Fixed timestamp to avoid cache issues
         let k3ndzySources = [
             RepositorySource(
-                manifestURL: URL(string: "https://raw.githubusercontent.com/k3ndzy/TIMOMOD-repo/main/repositories/official/repo.json?t=\(timestamp)")!
+                manifestURL: URL(string: "https://raw.githubusercontent.com/k3ndzy/TIMOMOD-repo/main/repositories/official/repo-\(timestamp).json")!
             )
         ]
         sources = k3ndzySources
