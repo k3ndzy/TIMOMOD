@@ -44,11 +44,14 @@ final class PackageRepositoryStore: ObservableObject {
             sourceStates[source.id] = .idle
         }
 #if targetEnvironment(simulator)
+        // TIMO MOD: Disabled simulator repositories - use real k3ndzy/TIMOMOD-repo only
+        /*
         if ProcessInfo.processInfo.arguments.contains("--simulate-wallpaper-repository") {
             installSimulatorWallpaperRepository()
         } else if ProcessInfo.processInfo.arguments.contains("--simulate-repository") {
             installSimulatorPreviewRepository()
         }
+        */
 #endif
     }
 
